@@ -27,7 +27,7 @@ class StockSerializer(serializers.ModelSerializer):
         positions = validated_data.pop('positions')
         stock = super().create(validated_data)
         for position in positions:
-            stock.create(position)
+            StockProduct.objects.create(**position, stock=stock)
         return stock
 
         # достаем связанные данные для других таблиц
@@ -42,7 +42,7 @@ class StockSerializer(serializers.ModelSerializer):
         positions = validated_data.pop('positions')
         stock = super().update(instance, validated_data)
         for position in positions:
-            stock.append(position)
+            StockProduct.objects.update(**position)
 
         return stock
 
