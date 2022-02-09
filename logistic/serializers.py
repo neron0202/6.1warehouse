@@ -38,18 +38,15 @@ class StockSerializer(serializers.ModelSerializer):
         # в нашем случае: таблицу StockProduct
         # с помощью списка positions
 
+    def update(self, instance, validated_data):
+        positions = validated_data.pop('positions')
+        stock = super().update(instance, validated_data)
+        for position in positions:
+            StockProduct.objects.update_or_create(stock=stock, product=position['product'],
+                                                  defaults={'price': position['price'],
+                                                            'quantity': position['quantity']})
+        return stock
 
-    def create_or_update(defaults=None, **positions):
-        defaults = {'price': positions['price'], 'quantity': positions['quantity']}
-        try:
-            obj = StockProduct.objects.get(stock=positions['stock'],  product=positions['product'])
-            for key, value in defaults.items():
-                setattr(obj, key, value)
-        except StockProduct.DoesNotExist:
-            new_values = {'price': positions['price'], 'quantity': positions['quantity']}
-            new_values.update(defaults)
-            obj = StockProduct(**new_values)
-            obj.save()
 
 
         # obj, created = StockProduct.objects.update_or_create(product=positions['product'], defaults={'price': positions['price'], 'quantity': positions['quantity']})
